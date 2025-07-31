@@ -13,7 +13,7 @@ INSTANCE_NAME="browser-data-collection-server"
 MACHINE_TYPE="e2-small"
 DISK_SIZE="10GB"
 DOCKER_IMAGE_NAME="browser-data-collection-server"
-CONTAINER_PORT="3306"
+CONTAINER_PORT="8080"
 EXTERNAL_PORT="8080"
 
 # Colors for output

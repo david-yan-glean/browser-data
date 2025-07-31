@@ -179,17 +179,21 @@ def handle_browser_event(event: Dict[str, Any]):
         cursor.close()
 
 
-@app.before_first_request
+# Initialize the application
 def initialize_app():
-    """Initialize the application before first request"""
+    """Initialize the application"""
     try:
         create_tables()
+        logger.info("Application initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize application: {e}")
         raise
 
 
 if __name__ == '__main__':
+    # Initialize the application before starting
+    initialize_app()
+    
     # Get port from environment or use default
     port = int(os.getenv("PORT", 8080))
     

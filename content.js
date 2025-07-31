@@ -223,7 +223,7 @@ function handleTextPaste(event) {
 // Send event to backend server
 async function sendEventToBackend(eventData) {
   try {
-    const response = await fetch('https://your-backend-url.com/api/events', {
+    const response = await fetch('https://34.83.75.136:8080/api/events', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
