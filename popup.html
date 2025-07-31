@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Quick Notes</h1>
+    
+    <div class="section">
+      <h3>Current Page</h3>
+      <div class="page-info">
+        <div id="page-title">Loading...</div>
+        <div id="page-url">Loading...</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Page HTML</h3>
+      <div class="html-container">
+        <textarea id="page-html" readonly placeholder="Loading page HTML..."></textarea>
+        <button id="copy-html">Copy HTML</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Add Note</h3>
+      <textarea id="note-input" placeholder="Enter your note here..."></textarea>
+      <button id="save-note">Save Note</button>
+    </div>
+
+    <div class="section">
+      <h3>Saved Notes</h3>
+      <div id="notes-list">No notes saved for this page.</div>
+    </div>
+
+    <div class="section">
+      <h3>Text Highlighter</h3>
+      <p class="info">Select text on the page and click highlight to mark it.</p>
+      <button id="toggle-highlight">Enable Highlighting</button>
+      <button id="clear-highlights">Clear All Highlights</button>
+    </div>
+
+    <div class="footer">
+      <button id="options-btn">Options</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

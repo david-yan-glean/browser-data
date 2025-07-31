@@ -1,0 +1,223 @@
+body {
+  width: 350px;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  background-color: #f8f9fa;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 16px 0;
+  color: #1a73e8;
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+}
+
+h3 {
+  margin: 0 0 8px 0;
+  color: #202124;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.section {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.page-info {
+  font-size: 12px;
+  color: #5f6368;
+}
+
+#page-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #202124;
+}
+
+#page-url {
+  word-break: break-all;
+  opacity: 0.8;
+}
+
+.html-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#page-html {
+  width: 100%;
+  height: 150px;
+  padding: 8px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 11px;
+  resize: vertical;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  color: #202124;
+  line-height: 1.4;
+}
+
+#page-html:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+#copy-html {
+  background: #5f6368;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+#copy-html:hover {
+  background: #4a4a4a;
+}
+
+#note-input {
+  width: 100%;
+  height: 60px;
+  padding: 8px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+#note-input:focus {
+  outline: none;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+button {
+  background: #1a73e8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 8px;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background: #1557b0;
+}
+
+button:active {
+  background: #1246a0;
+}
+
+#toggle-highlight {
+  background: #34a853;
+  margin-right: 8px;
+}
+
+#toggle-highlight:hover {
+  background: #2d8f47;
+}
+
+#toggle-highlight.active {
+  background: #ea4335;
+}
+
+#toggle-highlight.active:hover {
+  background: #d93025;
+}
+
+#clear-highlights {
+  background: #fbbc04;
+  color: #202124;
+}
+
+#clear-highlights:hover {
+  background: #f9ab00;
+}
+
+#notes-list {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.note-item {
+  background: #f8f9fa;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  position: relative;
+}
+
+.note-item:last-child {
+  margin-bottom: 0;
+}
+
+.note-text {
+  margin-bottom: 4px;
+}
+
+.note-time {
+  font-size: 11px;
+  color: #5f6368;
+}
+
+.note-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #ea4335;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.info {
+  font-size: 12px;
+  color: #5f6368;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e8eaed;
+}
+
+#options-btn {
+  background: #5f6368;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+#options-btn:hover {
+  background: #4a4a4a;
+}

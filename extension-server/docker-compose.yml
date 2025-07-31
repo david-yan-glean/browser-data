@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  extension-server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=${DB_HOST:-10.1.8.3}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-test}
+      - DB_PASSWORD=${DB_PASSWORD:-test4scio}
+      - DB_NAME=${DB_NAME:-browser_data}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - extension-network
+
+  # Optional: Add a local MySQL database for testing
+  # Uncomment if you want to run a local database for testing
+  # mysql:
+  #   image: mysql:8.0
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: rootpassword
+  #     MYSQL_DATABASE: browser_data
+  #     MYSQL_USER: test
+  #     MYSQL_PASSWORD: test4scio
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   networks:
+  #     - extension-network
+
+networks:
+  extension-network:
+    driver: bridge
+
+# volumes:
+#   mysql_data: 
