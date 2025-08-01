@@ -9,6 +9,7 @@ A starter Chrome extension that demonstrates core extension development concepts
 - **Persistent Storage**: All data is saved locally using Chrome's storage API
 - **Clean UI**: Modern, responsive popup interface
 - **Real-time Updates**: Notes and highlights update across all extension components
+- **Backend Integration**: Optional backend server for data collection and analytics
 
 ## Project Structure
 
@@ -26,6 +27,11 @@ chrome-extension/
 │   ├── icon32.png
 │   ├── icon48.png
 │   └── icon128.png
+├── extension-server/     # Backend server for data collection
+│   ├── app.py           # Flask application
+│   ├── run.py           # Server startup script
+│   ├── requirements.txt # Python dependencies
+│   └── HTTPS_SETUP.md   # HTTPS configuration guide
 └── README.md             # This file
 ```
 
@@ -42,17 +48,76 @@ chrome-extension/
 3. Click "Load unpacked" and select your extension folder
 4. The extension should now appear in your extensions list
 
-### 3. Test the Extension
+### 3. Set Up Backend Server (Optional)
+The extension includes a backend server for data collection. To set it up:
+
+1. **Install Python Dependencies**:
+   ```bash
+   cd extension-server
+   pip install -r requirements.txt
+   ```
+
+2. **Configure Environment**:
+   ```bash
+   cp env.example .env
+   # Edit .env with your database settings
+   ```
+
+3. **Set Up HTTPS** (Required for Mixed Content):
+   ```bash
+   # Generate self-signed certificate for development
+   python generate_ssl_cert.py
+   
+   # Or follow the full HTTPS setup guide
+   # See extension-server/HTTPS_SETUP.md
+   ```
+
+4. **Start the Server**:
+   ```bash
+   python run.py
+   ```
+
+### 4. Test the Extension
 1. Click the extension icon in the Chrome toolbar
 2. Try adding notes to different websites
 3. Test the highlighting feature by enabling it and selecting text
 4. Check that data persists when you reload pages
+5. Verify backend data collection (if server is running)
 
-### 4. Debug Issues
+### 5. Debug Issues
 - **Popup issues**: Right-click the extension icon → "Inspect popup"
 - **Content script issues**: Open DevTools on any webpage
 - **Background script issues**: Go to `chrome://extensions/` → Click "service worker" link
+- **Backend issues**: Check server logs and database connection
+- **Mixed Content errors**: Ensure HTTPS is properly configured
 - **Check console**: Look for error messages in all DevTools instances
+
+## Backend Server
+
+The extension includes a Flask backend server that collects browser events and stores them in a MySQL database. This is useful for:
+
+- **Analytics**: Track user behavior and extension usage
+- **Data Collection**: Store notes and highlights in the cloud
+- **Cross-device Sync**: Share data across multiple devices
+- **Backup**: Provide data backup and recovery
+
+### HTTPS Configuration
+
+**Important**: The backend server must use HTTPS to avoid Mixed Content errors when the extension runs on HTTPS pages (like Google Cloud Console).
+
+See `extension-server/HTTPS_SETUP.md` for detailed setup instructions.
+
+### Quick HTTPS Setup
+
+For development, generate a self-signed certificate:
+
+```bash
+cd extension-server
+python generate_ssl_cert.py
+python run.py
+```
+
+The server will automatically detect the SSL certificates and start in HTTPS mode.
 
 ## Core Concepts Demonstrated
 

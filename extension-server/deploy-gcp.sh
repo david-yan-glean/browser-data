@@ -84,11 +84,11 @@ docker run -d \
     --name extension-server \
     --restart unless-stopped \
     -p $CONTAINER_PORT:$CONTAINER_PORT \
-    -e DB_HOST=\${DB_HOST:-10.1.8.3} \
-    -e DB_PORT=\${DB_PORT:-3306} \
-    -e DB_USER=\${DB_USER:-test} \
-    -e DB_PASSWORD=\${DB_PASSWORD:-test4scio} \
-    -e DB_NAME=\${DB_NAME:-browser_data} \
+    -e DB_HOST=10.1.8.3 \
+    -e DB_PORT=3306 \
+    -e DB_USER=test \
+    -e DB_PASSWORD=test4scio \
+    -e DB_NAME=browser_data \
     gcr.io/$PROJECT_ID/$DOCKER_IMAGE_NAME"
 
 # Wait for instance to be ready

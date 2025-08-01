@@ -73,13 +73,14 @@ gcloud compute firewall-rules create allow-extension-server \
 
 ```bash
 gcloud compute instances create-with-container extension-server \
-    --zone=us-central1-a \
+    --zone=us-west1-a \
     --machine-type=e2-micro \
     --boot-disk-size=10GB \
-    --container-image=gcr.io/YOUR_PROJECT_ID/extension-server \
-    --container-port=8080 \
-    --tags=extension-server \
-    --metadata=startup-script="#!/bin/bash
+    --network=default \
+    --subnet=default \
+    --container-image=gcr.io/dev-sandbox-334901/extension-server \
+    --tags=extension-serve \
+    --metadata=startup-script="#!/bin/bash"
 # Install Docker if not present
 if ! command -v docker &> /dev/null; then
     curl -fsSL https://get.docker.com -o get-docker.sh
@@ -93,11 +94,11 @@ docker run -d \
     --name extension-server \
     --restart unless-stopped \
     -p 8080:8080 \
-    -e DB_HOST=\${DB_HOST:-10.1.8.3} \
-    -e DB_PORT=\${DB_PORT:-3306} \
-    -e DB_USER=\${DB_USER:-test} \
-    -e DB_PASSWORD=\${DB_PASSWORD:-test4scio} \
-    -e DB_NAME=\${DB_NAME:-browser_data} \
+    -e DB_HOST=10.1.8.3 \
+    -e DB_PORT=3306 \
+    -e DB_USER=test \
+    -e DB_PASSWORD=test4scio \
+    -e DB_NAME=browser_data \
     gcr.io/YOUR_PROJECT_ID/extension-server"
 ```
 
@@ -108,7 +109,7 @@ docker run -d \
 3. Click "Create Instance"
 4. Configure the instance:
    - **Name**: `extension-server`
-   - **Region/Zone**: `us-central1-a`
+   - **Region/Zone**: `us-west1-a`
    - **Machine type**: `e2-micro` (free tier eligible)
    - **Boot disk**: 10GB standard persistent disk
    - **Firewall**: Allow HTTP traffic
@@ -123,7 +124,7 @@ If you need to customize the database connection, you can set environment variab
 
 ```bash
 # SSH into the instance
-gcloud compute ssh extension-server --zone=us-central1-a
+gcloud compute ssh extension-server --zone=us-west1-a
 
 # Stop the current container
 docker stop extension-server
@@ -147,7 +148,7 @@ docker run -d \
 ```bash
 # Get the external IP address
 gcloud compute instances describe extension-server \
-    --zone=us-central1-a \
+    --zone=us-west1-a \
     --format="get(networkInterfaces[0].accessConfigs[0].natIP)"
 ```
 
@@ -180,27 +181,27 @@ const SERVER_URL = 'http://EXTERNAL_IP:8080';
 
 ### View Logs
 ```bash
-gcloud compute ssh extension-server --zone=us-central1-a --command='docker logs extension-server'
+gcloud compute ssh extension-server --zone=us-west1-a --command='docker logs extension-server'
 ```
 
 ### SSH into Instance
 ```bash
-gcloud compute ssh extension-server --zone=us-central1-a
+gcloud compute ssh extension-server --zone=us-west1-a
 ```
 
 ### Stop Instance
 ```bash
-gcloud compute instances stop extension-server --zone=us-central1-a
+gcloud compute instances stop extension-server --zone=us-west1-a
 ```
 
 ### Start Instance
 ```bash
-gcloud compute instances start extension-server --zone=us-central1-a
+gcloud compute instances start extension-server --zone=us-west1-a
 ```
 
 ### Delete Instance
 ```bash
-gcloud compute instances delete extension-server --zone=us-central1-a
+gcloud compute instances delete extension-server --zone=us-west1-a
 ```
 
 ## Cost Optimization

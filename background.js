@@ -17,7 +17,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 // Handle browser action click (when popup is not available)
 chrome.action.onClicked.addListener(async (tab) => {
   // This will only trigger if no popup is defined
-  console.log('Extension icon clicked for tab:', tab.id);
+  console.log('Extension icon clicked for tab:', tab?.id);
 });
 
 // Handle messages from content scripts and popup
@@ -105,13 +105,15 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   // Notify all tabs about storage changes
   chrome.tabs.query({}, (tabs) => {
     tabs.forEach(tab => {
-      chrome.tabs.sendMessage(tab.id, {
-        action: 'storageChanged',
-        changes: changes,
-        namespace: namespace
-      }).catch(() => {
-        // Ignore errors for tabs that can't receive messages
-      });
+      if (tab?.id) {
+        chrome.tabs.sendMessage(tab.id, {
+          action: 'storageChanged',
+          changes: changes,
+          namespace: namespace
+        }).catch(() => {
+          // Ignore errors for tabs that can't receive messages
+        });
+      }
     });
   });
 });
@@ -168,13 +170,13 @@ async function updateBadge(url, tabId) {
 
 // Handle tab creation (new tab opened)
 chrome.tabs.onCreated.addListener((tab) => {
-  console.log('New tab opened:', tab.url || 'about:newtab');
+  console.log('New tab opened:', tab?.url || 'about:newtab');
   
   // Send to backend
   sendEventToBackend({
     event_type: 'new_tab',
-    url: tab.url || 'about:newtab',
-    tab_id: tab.id,
+    url: tab?.url || 'about:newtab',
+    tab_id: tab?.id || null,
     user_agent: navigator.userAgent
   });
 });
@@ -195,7 +197,15 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 // Send event to backend server
 async function sendEventToBackend(eventData) {
   try {
-    const response = await fetch('https://your-backend-url.com/api/events', {
+    // Get the external IP from your GCP instance
+    // Use HTTPS by default to avoid Mixed Content errors
+    const SERVER_URL = 'https://34.83.75.136:8080';
+    const FALLBACK_URL = 'http://34.83.75.136:8080';
+    
+    console.log('Sending event to backend:', SERVER_URL, eventData);
+    
+    // Try HTTPS first
+    let response = await fetch(`${SERVER_URL}/api/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -204,12 +214,50 @@ async function sendEventToBackend(eventData) {
     });
     
     if (response.ok) {
-      console.log('Event sent to backend successfully');
+      console.log('Event sent to backend successfully via HTTPS');
+      return;
+    }
+    
+    // If HTTPS fails, try HTTP fallback (for development)
+    console.log('HTTPS failed, trying HTTP fallback...');
+    response = await fetch(`${FALLBACK_URL}/api/events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData)
+    });
+    
+    if (response.ok) {
+      console.log('Event sent to backend successfully via HTTP fallback');
     } else {
-      console.error('Failed to send event to backend:', response.status);
+      console.error('Failed to send event to backend:', response.status, response.statusText);
     }
   } catch (error) {
     console.error('Error sending event to backend:', error);
+    
+    // If HTTPS fails with network error, try HTTP fallback
+    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+      try {
+        console.log('Trying HTTP fallback due to HTTPS error...');
+        const FALLBACK_URL = 'http://34.83.75.136:8080';
+        const response = await fetch(`${FALLBACK_URL}/api/events`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(eventData)
+        });
+        
+        if (response.ok) {
+          console.log('Event sent to backend successfully via HTTP fallback');
+        } else {
+          console.error('HTTP fallback also failed:', response.status, response.statusText);
+        }
+      } catch (fallbackError) {
+        console.error('HTTP fallback also failed:', fallbackError);
+      }
+    }
   }
 }
 

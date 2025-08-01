@@ -21,6 +21,10 @@ app = Flask(__name__)
 # Database connection
 db_conn = None
 
+# SSL Configuration
+SSL_CERT_PATH = os.getenv("SSL_CERT_PATH", "cert.pem")
+SSL_KEY_PATH = os.getenv("SSL_KEY_PATH", "key.pem")
+
 
 def get_db_connection():
     """Get database connection with retry logic"""
@@ -105,6 +109,9 @@ def handle_health():
 @app.route('/api/events', methods=['POST', 'OPTIONS'])
 def handle_events():
     """Handle browser events endpoint"""
+    logger.info(f"Received {request.method} request to /api/events")
+    logger.info(f"Request headers: {dict(request.headers)}")
+    
     # Handle CORS preflight requests
     if request.method == 'OPTIONS':
         response = jsonify({})
@@ -198,4 +205,19 @@ if __name__ == '__main__':
     port = int(os.getenv("PORT", 8080))
     
     logger.info(f"Server starting on port {port}")
-    app.run(host='0.0.0.0', port=port, debug=False) 
+    
+    # Check if SSL certificates exist for HTTPS
+    if os.path.exists(SSL_CERT_PATH) and os.path.exists(SSL_KEY_PATH):
+        logger.info("SSL certificates found, starting HTTPS server")
+        app.run(
+            host='0.0.0.0', 
+            port=port, 
+            debug=False, 
+            threaded=True,
+            ssl_context=(SSL_CERT_PATH, SSL_KEY_PATH)
+        )
+    else:
+        logger.info("SSL certificates not found, starting HTTP server")
+        logger.warning("For production use, configure HTTPS to avoid Mixed Content errors")
+        # Use threaded=True to handle multiple requests and set explicit HTTP version
+        app.run(host='0.0.0.0', port=port, debug=False, threaded=True) 
