@@ -1,5 +1,8 @@
 // Background service worker for the extension
 
+// Import utility functions
+importScripts('utils.js');
+
 // Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
   console.log('Quick Notes & Highlighter installed');
@@ -63,7 +66,7 @@ async function handleSaveNote(url, note) {
     notes.push({
       text: note.text,
       timestamp: Date.now(),
-      id: generateId()
+      id: extensionUtils.generateId()
     });
     
     await chrome.storage.local.set({ [url]: notes });
@@ -91,11 +94,6 @@ async function handleDeleteNote(url, index) {
     console.error('Error deleting note:', error);
     return { success: false, error: error.message };
   }
-}
-
-// Generate unique ID for notes
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 // Handle storage changes to sync across tabs
@@ -131,7 +129,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url) {
     console.log('Navigated to:', changeInfo.url);
     
-    // Send to backend
+    // Send to backend using unified function
     sendEventToBackend({
       event_type: 'navigation',
       url: changeInfo.url,
@@ -172,7 +170,7 @@ async function updateBadge(url, tabId) {
 chrome.tabs.onCreated.addListener((tab) => {
   console.log('New tab opened:', tab?.url || 'about:newtab');
   
-  // Send to backend
+  // Send to backend using unified function
   sendEventToBackend({
     event_type: 'new_tab',
     url: tab?.url || 'about:newtab',
@@ -185,7 +183,7 @@ chrome.tabs.onCreated.addListener((tab) => {
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
   console.log('Tab closed:', tabId);
   
-  // Send to backend
+  // Send to backend using unified function
   sendEventToBackend({
     event_type: 'tab_closed',
     url: '',
@@ -193,73 +191,6 @@ chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
     user_agent: navigator.userAgent
   });
 });
-
-// Send event to backend server
-async function sendEventToBackend(eventData) {
-  try {
-    // Get the external IP from your GCP instance
-    // Use HTTPS by default to avoid Mixed Content errors
-    const SERVER_URL = 'https://34.83.75.136:8080';
-    const FALLBACK_URL = 'http://34.83.75.136:8080';
-    
-    console.log('Sending event to backend:', SERVER_URL, eventData);
-    
-    // Try HTTPS first
-    let response = await fetch(`${SERVER_URL}/api/events`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData)
-    });
-    
-    if (response.ok) {
-      console.log('Event sent to backend successfully via HTTPS');
-      return;
-    }
-    
-    // If HTTPS fails, try HTTP fallback (for development)
-    console.log('HTTPS failed, trying HTTP fallback...');
-    response = await fetch(`${FALLBACK_URL}/api/events`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData)
-    });
-    
-    if (response.ok) {
-      console.log('Event sent to backend successfully via HTTP fallback');
-    } else {
-      console.error('Failed to send event to backend:', response.status, response.statusText);
-    }
-  } catch (error) {
-    console.error('Error sending event to backend:', error);
-    
-    // If HTTPS fails with network error, try HTTP fallback
-    if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-      try {
-        console.log('Trying HTTP fallback due to HTTPS error...');
-        const FALLBACK_URL = 'http://34.83.75.136:8080';
-        const response = await fetch(`${FALLBACK_URL}/api/events`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(eventData)
-        });
-        
-        if (response.ok) {
-          console.log('Event sent to backend successfully via HTTP fallback');
-        } else {
-          console.error('HTTP fallback also failed:', response.status, response.statusText);
-        }
-      } catch (fallbackError) {
-        console.error('HTTP fallback also failed:', fallbackError);
-      }
-    }
-  }
-}
 
 // Handle context menu items (if we want to add them later)
 chrome.runtime.onStartup.addListener(() => {

@@ -22,6 +22,7 @@ chrome-extension/
 ├── content.js            # Content script for page interaction
 ├── content.css           # Styles injected into web pages
 ├── background.js         # Background service worker
+├── utils.js              # Shared utility functions (backend communication, etc.)
 ├── icons/                # Extension icons (you'll need to add these)
 │   ├── icon16.png
 │   ├── icon32.png
@@ -100,6 +101,16 @@ The extension includes a Flask backend server that collects browser events and s
 - **Data Collection**: Store notes and highlights in the cloud
 - **Cross-device Sync**: Share data across multiple devices
 - **Backup**: Provide data backup and recovery
+
+### Unified Backend Communication
+
+The extension uses a unified `sendEventToBackend` function in `utils.js` that:
+
+- **Tries HTTPS first** to avoid Mixed Content errors
+- **Falls back to HTTP** if HTTPS fails (for development)
+- **Handles network errors** gracefully
+- **Provides consistent logging** across all components
+- **Returns success/failure status** for better error handling
 
 ### HTTPS Configuration
 

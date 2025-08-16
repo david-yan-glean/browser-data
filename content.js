@@ -36,8 +36,8 @@ function handleTextSelection() {
     // Console log the highlighted text
     console.log('Highlighted text:', selectedText);
     
-    // Send to backend
-    sendEventToBackend({
+    // Send to backend using unified function
+    extensionUtils.sendEventToBackend({
       event_type: 'highlight',
       url: window.location.href,
       highlighted_text: selectedText,
@@ -170,8 +170,8 @@ function handleLinkClick(event) {
     const url = link.href;
     console.log('Link clicked:', url);
     
-    // Send to backend
-    sendEventToBackend({
+    // Send to backend using unified function
+    extensionUtils.sendEventToBackend({
       event_type: 'link_click',
       url: window.location.href,
       clicked_url: url,
@@ -188,8 +188,8 @@ function handleTextCopy(event) {
   if (copiedText.length > 0) {
     console.log('Text copied:', copiedText);
     
-    // Send to backend
-    sendEventToBackend({
+    // Send to backend using unified function
+    extensionUtils.sendEventToBackend({
       event_type: 'copy',
       url: window.location.href,
       text: copiedText,
@@ -207,35 +207,14 @@ function handleTextPaste(event) {
   if (pastedText && pastedText.trim().length > 0) {
     console.log('Text pasted:', pastedText.trim());
     
-    // Send to backend
-    sendEventToBackend({
+    // Send to backend using unified function
+    extensionUtils.sendEventToBackend({
       event_type: 'paste',
       url: window.location.href,
       text: pastedText.trim(),
       action: 'paste',
       user_agent: navigator.userAgent
     });
-  }
-}
-
-// Send event to backend server
-async function sendEventToBackend(eventData) {
-  try {
-    const response = await fetch('http://34.83.75.136:8080/api/events', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData)
-    });
-    
-    if (response.ok) {
-      console.log('Event sent to backend successfully');
-    } else {
-      console.error('Failed to send event to backend:', response.status, response.statusText);
-    }
-  } catch (error) {
-    console.error('Error sending event to backend:', error);
   }
 }
 
