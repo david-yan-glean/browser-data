@@ -1,7 +1,6 @@
 // Initialize popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', async function() {
   await loadPageInfo();
-  await loadNotes();
   setupEventListeners();
 });
 
@@ -35,117 +34,6 @@ async function loadPageInfo() {
     }
   } catch (error) {
     console.error('Error loading page info:', error);
-  }
-}
-
-// Load saved notes for current page
-async function loadNotes() {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const url = tab.url;
-    const result = await chrome.storage.local.get([url]);
-    const notes = result[url] || [];
-    
-    displayNotes(notes);
-  } catch (error) {
-    console.error('Error loading notes:', error);
-  }
-}
-
-// Display notes in the popup
-function displayNotes(notes) {
-  const notesList = document.getElementById('notes-list');
-  
-  if (notes.length === 0) {
-    notesList.innerHTML = '<p class="info">No notes saved for this page.</p>';
-    return;
-  }
-
-  notesList.innerHTML = notes.map((note, index) => `
-    <div class="note-item">
-      <div class="note-text">${escapeHtml(note.text)}</div>
-      <div class="note-time">${new Date(note.timestamp).toLocaleString()}</div>
-      <button class="note-delete" data-index="${index}">×</button>
-    </div>
-  `).join('');
-
-  // Add delete functionality
-  notesList.querySelectorAll('.note-delete').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      const index = parseInt(e.target.dataset.index);
-      await deleteNote(index);
-    });
-  });
-}
-
-// Save a new note
-async function saveNote() {
-  const noteInput = document.getElementById('note-input');
-  const noteText = noteInput.value.trim();
-  
-  if (!noteText) return;
-
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const url = tab.url;
-    const result = await chrome.storage.local.get([url]);
-    const notes = result[url] || [];
-    
-    notes.push({
-      text: noteText,
-      timestamp: Date.now()
-    });
-    
-    await chrome.storage.local.set({ [url]: notes });
-    noteInput.value = '';
-    await loadNotes();
-  } catch (error) {
-    console.error('Error saving note:', error);
-  }
-}
-
-// Delete a note
-async function deleteNote(index) {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const url = tab.url;
-    const result = await chrome.storage.local.get([url]);
-    const notes = result[url] || [];
-    
-    notes.splice(index, 1);
-    await chrome.storage.local.set({ [url]: notes });
-    await loadNotes();
-  } catch (error) {
-    console.error('Error deleting note:', error);
-  }
-}
-
-// Toggle highlighting mode
-async function toggleHighlighting() {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const response = await chrome.tabs.sendMessage(tab.id, { action: 'toggleHighlighting' });
-    
-    const button = document.getElementById('toggle-highlight');
-    if (response.enabled) {
-      button.textContent = 'Disable Highlighting';
-      button.classList.add('active');
-    } else {
-      button.textContent = 'Enable Highlighting';
-      button.classList.remove('active');
-    }
-  } catch (error) {
-    console.error('Error toggling highlighting:', error);
-  }
-}
-
-// Clear all highlights
-async function clearHighlights() {
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    await chrome.tabs.sendMessage(tab.id, { action: 'clearHighlights' });
-  } catch (error) {
-    console.error('Error clearing highlights:', error);
   }
 }
 

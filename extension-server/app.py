@@ -62,11 +62,12 @@ def create_tables():
     
     try:
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS browser_events (
+            CREATE TABLE IF NOT EXISTS browser_events_v2 (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 event_type VARCHAR(50) NOT NULL,
                 url TEXT NOT NULL,
-                tab_id INT,
+                page_title TEXT,
+                html_content TEXT,
                 text TEXT,
                 highlighted_text TEXT,
                 clicked_url TEXT,
@@ -154,7 +155,8 @@ def handle_browser_event(event: Dict[str, Any]):
     """Handle browser event and insert into database"""
     # Extract all possible data fields
     url = get_string(event, "url")
-    tab_id = get_int(event, "tab_id")
+    page_title = get_string(event, "page_title")
+    html_content = get_string(event, "html_content")
     text = get_string(event, "text")
     highlighted_text = get_string(event, "highlighted_text")
     clicked_url = get_string(event, "clicked_url")
@@ -168,13 +170,13 @@ def handle_browser_event(event: Dict[str, Any]):
     try:
         # Insert into unified database table
         cursor.execute("""
-            INSERT INTO browser_events (
-                event_type, url, tab_id, text, highlighted_text, 
+            INSERT INTO browser_events_v2 (
+                event_type, url, page_title, html_content, text, highlighted_text, 
                 clicked_url, action, timestamp, user_agent
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            event_type, url, tab_id, text, highlighted_text,
+            event_type, url, page_title, html_content, text, highlighted_text,
             clicked_url, action, datetime.now(), user_agent
         ))
         logger.info(f"Successfully inserted browser event: {event_type}")

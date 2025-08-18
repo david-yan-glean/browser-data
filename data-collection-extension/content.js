@@ -161,6 +161,34 @@ function init() {
   
   // Add paste handler for text
   document.addEventListener('paste', handleTextPaste);
+  
+  // Capture and send page HTML after a delay to ensure full loading
+  setTimeout(captureAndSendPageHTML, 2000);
+}
+
+// Capture and send the raw HTML of the current page
+function captureAndSendPageHTML() {
+  try {
+    // Get the raw HTML of the document
+    const rawHTML = document.documentElement.outerHTML;
+    const url = window.location.href;
+    const title = document.title;
+    
+    console.log('Capturing HTML for page:', url, 'Title:', title);
+    console.log('HTML length:', rawHTML.length);
+    
+    // Send to backend using unified function
+    extensionUtils.sendEventToBackend({
+      event_type: 'page_html',
+      url: url,
+      page_title: title,
+      html_content: rawHTML,
+      user_agent: navigator.userAgent
+    });
+    
+  } catch (error) {
+    console.error('Error capturing page HTML:', error);
+  }
 }
 
 // Handle link clicks
@@ -224,3 +252,22 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+// Also listen for window load event to capture HTML after all resources are loaded
+window.addEventListener('load', () => {
+  // Wait a bit more for any dynamic content to load
+  setTimeout(captureAndSendPageHTML, 1000);
+});
+
+// Listen for navigation events (for SPAs and dynamic content)
+let lastUrl = window.location.href;
+const observer = new MutationObserver(() => {
+  if (window.location.href !== lastUrl) {
+    lastUrl = window.location.href;
+    // Wait for the new page to load
+    setTimeout(captureAndSendPageHTML, 2000);
+  }
+});
+
+// Start observing for URL changes
+observer.observe(document, { subtree: true, childList: true });

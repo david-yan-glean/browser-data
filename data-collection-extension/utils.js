@@ -3,14 +3,16 @@
 /**
  * Send event data to the backend server with HTTPS/HTTP fallback
  * @param {Object} eventData - The event data to send
- * @param {string} eventData.event_type - Type of event (e.g., 'navigation', 'highlight', 'link_click')
+ * @param {string} eventData.event_type - Type of event (e.g., 'navigation', 'highlight', 'link_click', 'page_html')
  * @param {string} eventData.url - Current page URL
  * @param {string} [eventData.text] - Text content (for copy/paste events)
  * @param {string} [eventData.highlighted_text] - Highlighted text
  * @param {string} [eventData.clicked_url] - Clicked URL
  * @param {string} [eventData.action] - Action performed
- * @param {number} [eventData.tab_id] - Tab ID
  * @param {string} [eventData.user_agent] - User agent string
+ * @param {string} [eventData.page_title] - Page title (for page_html events)
+ * @param {string} [eventData.html_content] - Raw HTML content (for page_html events)
+ * @param {number} [eventData.html_length] - Length of HTML content (for page_html events)
  * @returns {Promise<boolean>} - True if successful, false otherwise
  */
 async function sendEventToBackend(eventData) {
@@ -33,6 +35,8 @@ async function sendEventToBackend(eventData) {
     if (response.ok) {
       console.log('Event sent to backend successfully via HTTPS');
       return true;
+    } else {
+      console.error('Failed to send event to backend:', response.status, response.statusText);
     }
     
     // If HTTPS fails, try HTTP fallback (for development)
