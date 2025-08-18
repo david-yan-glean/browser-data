@@ -1,56 +1,69 @@
-# Quick Notes & Highlighter Chrome Extension
+# Browser Data Collector Chrome Extension
 
-A starter Chrome extension that demonstrates core extension development concepts through a practical productivity tool.
+A Chrome extension that collects comprehensive browser data including page HTML, user interactions, and navigation events, with optional backend integration for data storage and analytics.
 
 ## Features
 
-- **Quick Notes**: Save page-specific notes that persist across browser sessions
-- **Text Highlighting**: Select and highlight text on any webpage
-- **Persistent Storage**: All data is saved locally using Chrome's storage API
-- **Clean UI**: Modern, responsive popup interface
-- **Real-time Updates**: Notes and highlights update across all extension components
-- **Backend Integration**: Optional backend server for data collection and analytics
+- **Page HTML Capture**: Automatically captures and displays the raw HTML of every webpage visited
+- **Text Highlighting**: Select and highlight text on any webpage with visual feedback
+- **User Interaction Tracking**: Monitors link clicks, text copying, and pasting activities
+- **Navigation Monitoring**: Tracks page navigation, new tab creation, and tab closure
+- **Real-time Data Display**: Shows current page information and HTML content in the popup
+- **Backend Integration**: Sends all collected data to a configurable backend server
+- **HTTPS/HTTP Fallback**: Robust backend communication with automatic fallback
+- **Cross-tab Synchronization**: Real-time updates across all browser tabs
 
 ## Project Structure
 
 ```
 chrome-extension/
-├── manifest.json          # Extension configuration and permissions
-├── popup.html            # Extension popup interface
-├── popup.css             # Popup styling
-├── popup.js              # Popup functionality
-├── content.js            # Content script for page interaction
-├── content.css           # Styles injected into web pages
-├── background.js         # Background service worker
-├── utils.js              # Shared utility functions (backend communication, etc.)
-├── icons/                # Extension icons (you'll need to add these)
-│   ├── icon16.png
-│   ├── icon32.png
-│   ├── icon48.png
-│   └── icon128.png
-├── extension-server/     # Backend server for data collection
-│   ├── app.py           # Flask application
-│   ├── run.py           # Server startup script
-│   ├── requirements.txt # Python dependencies
-│   └── HTTPS_SETUP.md   # HTTPS configuration guide
-└── README.md             # This file
+├── data-collection-extension/    # Main extension directory
+│   ├── manifest.json             # Extension configuration and permissions
+│   ├── popup.html               # Extension popup interface
+│   ├── popup.css                # Popup styling
+│   ├── popup.js                 # Popup functionality
+│   ├── content.js               # Content script for page interaction
+│   ├── content.css              # Styles injected into web pages
+│   ├── background.js            # Background service worker
+│   ├── utils.js                 # Shared utility functions (backend communication)
+│   └── icons/                   # Extension icons
+│       ├── icon16.png
+│       ├── icon32.png
+│       ├── icon48.png
+│       └── icon128.png
+├── extension-server/             # Backend server for data collection
+│   ├── app.py                   # Flask application
+│   ├── run.py                   # Server startup script
+│   ├── requirements.txt         # Python dependencies
+│   ├── Dockerfile               # Docker configuration
+│   ├── docker-compose.yml       # Docker Compose setup
+│   ├── setup_https.sh           # HTTPS setup script
+│   ├── setup_comodo_ssl.sh      # Comodo SSL setup
+│   ├── COMODO_SSL_SETUP.md      # SSL configuration guide
+│   ├── DEPLOYMENT.md            # Deployment instructions
+│   ├── deploy-gcp.sh            # Google Cloud deployment script
+│   ├── deploy-gcp-manual.md     # Manual GCP deployment guide
+│   └── test_connection.py       # Connection testing utility
+├── utils.js                     # Shared utilities (root level)
+├── .gitignore                   # Git ignore rules
+└── README.md                    # This file
 ```
 
 ## Installation & Development
 
 ### 1. Set Up the Project
-1. Create a new folder for your extension
-2. Copy all the provided files into this folder
-3. Create an `icons` folder and add icon files (16x16, 32x32, 48x48, 128x128 px)
+1. Clone or download the project
+2. Navigate to the `data-collection-extension` directory
+3. Ensure all icon files are present in the `icons/` folder
 
 ### 2. Load the Extension
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode" in the top right
-3. Click "Load unpacked" and select your extension folder
+3. Click "Load unpacked" and select the `data-collection-extension` folder
 4. The extension should now appear in your extensions list
 
 ### 3. Set Up Backend Server (Optional)
-The extension includes a backend server for data collection. To set it up:
+The extension includes a comprehensive backend server for data collection. To set it up:
 
 1. **Install Python Dependencies**:
    ```bash
@@ -66,11 +79,11 @@ The extension includes a backend server for data collection. To set it up:
 
 3. **Set Up HTTPS** (Required for Mixed Content):
    ```bash
-   # Generate self-signed certificate for development
-   python generate_ssl_cert.py
+   # Quick setup with self-signed certificate
+   ./setup_https.sh
    
-   # Or follow the full HTTPS setup guide
-   # See extension-server/HTTPS_SETUP.md
+   # Or follow the detailed SSL setup guide
+   # See extension-server/COMODO_SSL_SETUP.md
    ```
 
 4. **Start the Server**:
@@ -80,136 +93,160 @@ The extension includes a backend server for data collection. To set it up:
 
 ### 4. Test the Extension
 1. Click the extension icon in the Chrome toolbar
-2. Try adding notes to different websites
+2. Navigate to different websites to see HTML capture in action
 3. Test the highlighting feature by enabling it and selecting text
-4. Check that data persists when you reload pages
-5. Verify backend data collection (if server is running)
+4. Try copying and pasting text to see interaction tracking
+5. Check that data is being sent to the backend (if server is running)
 
-### 5. Debug Issues
-- **Popup issues**: Right-click the extension icon → "Inspect popup"
-- **Content script issues**: Open DevTools on any webpage
-- **Background script issues**: Go to `chrome://extensions/` → Click "service worker" link
-- **Backend issues**: Check server logs and database connection
-- **Mixed Content errors**: Ensure HTTPS is properly configured
-- **Check console**: Look for error messages in all DevTools instances
+## Data Collection Features
 
-## Backend Server
+### Page HTML Capture
+- **Automatic Capture**: HTML is captured automatically when pages load
+- **Multiple Triggers**: Captures on DOM load, window load, and URL changes
+- **SPA Support**: Detects navigation in single-page applications
+- **Real-time Display**: Shows HTML content in the extension popup
+- **Copy Functionality**: Easy HTML copying from the popup interface
 
-The extension includes a Flask backend server that collects browser events and stores them in a MySQL database. This is useful for:
+### User Interaction Tracking
+- **Text Highlighting**: Tracks highlighted text selections
+- **Link Clicks**: Monitors all link click events
+- **Copy/Paste Events**: Records text copying and pasting activities
+- **Navigation Events**: Tracks page navigation, new tabs, and tab closure
 
-- **Analytics**: Track user behavior and extension usage
-- **Data Collection**: Store notes and highlights in the cloud
-- **Cross-device Sync**: Share data across multiple devices
-- **Backup**: Provide data backup and recovery
-
-### Unified Backend Communication
-
-The extension uses a unified `sendEventToBackend` function in `utils.js` that:
+### Backend Communication
+The extension uses a unified `sendEventToBackend` function that:
 
 - **Tries HTTPS first** to avoid Mixed Content errors
 - **Falls back to HTTP** if HTTPS fails (for development)
 - **Handles network errors** gracefully
 - **Provides consistent logging** across all components
-- **Returns success/failure status** for better error handling
+- **Supports multiple event types**:
+  - `page_html`: Raw HTML content with metadata
+  - `highlight`: Text highlighting events
+  - `link_click`: Link interaction events
+  - `copy`/`paste`: Text manipulation events
+  - `navigation`: Page navigation events
+  - `new_tab`/`tab_closed`: Tab management events
+
+## Backend Server
+
+The extension includes a production-ready Flask backend server with:
+
+### Features
+- **Data Storage**: MySQL database integration
+- **HTTPS Support**: SSL/TLS configuration with Comodo certificates
+- **Docker Support**: Containerized deployment
+- **Google Cloud Ready**: GCP deployment scripts and documentation
+- **Connection Testing**: Built-in connection validation tools
+
+### Deployment Options
+1. **Local Development**: Quick setup with self-signed certificates
+2. **Docker Deployment**: Containerized deployment with docker-compose
+3. **Google Cloud Platform**: Automated deployment scripts
+4. **Manual Deployment**: Step-by-step deployment guide
 
 ### HTTPS Configuration
+**Important**: The backend server must use HTTPS to avoid Mixed Content errors when the extension runs on HTTPS pages.
 
-**Important**: The backend server must use HTTPS to avoid Mixed Content errors when the extension runs on HTTPS pages (like Google Cloud Console).
-
-See `extension-server/HTTPS_SETUP.md` for detailed setup instructions.
-
-### Quick HTTPS Setup
-
-For development, generate a self-signed certificate:
-
-```bash
-cd extension-server
-python generate_ssl_cert.py
-python run.py
-```
-
-The server will automatically detect the SSL certificates and start in HTTPS mode.
+See `extension-server/COMODO_SSL_SETUP.md` for detailed SSL setup instructions.
 
 ## Core Concepts Demonstrated
 
 ### Manifest V3
 - Modern Chrome extension configuration
-- Permissions system (storage, activeTab)
+- Comprehensive permissions system (storage, activeTab, scripting, notifications, tabs)
 - Service worker background scripts
+- Web accessible resources
 
 ### Extension Components
-- **Popup**: User interface when clicking the extension icon
-- **Content Script**: JavaScript that runs on web pages
-- **Background Script**: Handles events and long-running tasks
-- **Storage API**: Persistent data storage
+- **Popup**: Rich user interface with HTML display and interaction controls
+- **Content Script**: Advanced page interaction and data collection
+- **Background Script**: Event handling and navigation monitoring
+- **Storage API**: Persistent data storage and cross-tab synchronization
 
 ### Communication
 - Message passing between popup and content scripts
 - Background script event handling
-- Storage change listening
+- Storage change listening across tabs
+- Unified backend communication system
 
 ### User Interface
 - Modern CSS styling with Chrome's design language
-- Responsive layout that works in the popup
+- Responsive layout optimized for popup dimensions
 - Real-time updates and user feedback
+- HTML content display and copying functionality
+
+## Data Privacy & Security
+
+### Local Data
+- All extension data is stored locally using Chrome's storage API
+- No data is sent to external servers unless backend is configured
+- User has full control over data collection
+
+### Backend Data
+- Optional backend integration for analytics and data storage
+- HTTPS encryption for all backend communication
+- Configurable data retention policies
+- User consent required for data collection
 
 ## Customization Ideas
 
 ### Easy Modifications
 - Change highlight colors in `content.css`
-- Modify the popup size in `popup.css`
-- Add new note categories or tags
-- Change the extension name and description
+- Modify the popup size and layout in `popup.css`
+- Adjust HTML capture timing and triggers
+- Customize event tracking parameters
 
 ### Advanced Features
-- Export notes to different formats
-- Sync notes across devices
-- Add note search functionality
-- Implement note sharing
-- Add keyboard shortcuts
-- Create an options page for settings
+- Export collected data to different formats
+- Implement data visualization and analytics
+- Add machine learning for content analysis
+- Create data processing pipelines
+- Build custom dashboards for collected data
 
 ### API Integrations
-- Save notes to cloud services
-- OCR for image text highlighting
-- Translation features
-- Web scraping capabilities
+- Integrate with external analytics platforms
+- Connect to data warehouses and BI tools
+- Implement real-time data streaming
+- Add webhook support for event notifications
 
 ## Common Issues & Solutions
 
 ### Permission Errors
-- Make sure all required permissions are in `manifest.json`
-- Some APIs require additional permissions
+- Ensure all required permissions are in `manifest.json`
+- Some APIs require additional permissions for full functionality
 
 ### Content Script Not Working
 - Check if the page allows content scripts
 - Some pages (chrome://, extension pages) block content scripts
 - Verify the `matches` pattern in manifest
 
-### Storage Not Persisting
-- Use `chrome.storage.local` for local data
-- Use `chrome.storage.sync` for data that syncs across devices
-- Check storage quotas if saving large amounts of data
+### Backend Connection Issues
+- Verify HTTPS configuration for production
+- Check firewall and network settings
+- Use `test_connection.py` to validate connectivity
+- Review server logs for detailed error information
 
-### Popup Not Opening
-- Verify `popup.html` path in manifest
-- Check for JavaScript errors in popup
-- Ensure popup HTML is valid
-
-## Next Steps
-
-1. **Add Icons**: Create proper icon files for your extension
-2. **Test Thoroughly**: Try the extension on different websites
-3. **Add Features**: Implement additional functionality you need
-4. **Prepare for Publishing**: Create promotional images and descriptions
-5. **Submit to Chrome Web Store**: Package and publish your extension
+### HTML Capture Issues
+- Some pages may block content access
+- Dynamic content may require longer capture delays
+- Check console for capture-related errors
 
 ## Development Tips
 
 - Use `console.log()` extensively for debugging
-- Test on different types of websites
+- Test on different types of websites and content
+- Monitor network requests in DevTools
 - Check Chrome's extension documentation for advanced APIs
-- Consider user experience and performance
-- Keep the popup lightweight and fast
+- Consider performance impact of HTML capture on large pages
+- Test backend communication thoroughly before deployment
 
-This starter project gives you a solid foundation for building any type of Chrome extension!
+## Next Steps
+
+1. **Configure Backend**: Set up the backend server for data collection
+2. **Customize Collection**: Adjust what data is collected and when
+3. **Add Analytics**: Implement data analysis and visualization
+4. **Deploy Production**: Set up production deployment with proper SSL
+5. **Scale Infrastructure**: Plan for handling large volumes of data
+
+This extension provides a comprehensive foundation for browser data collection and analysis, with production-ready backend integration and deployment options.
