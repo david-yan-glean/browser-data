@@ -3,7 +3,7 @@
 /**
  * Send event data to the backend server with HTTPS/HTTP fallback
  * @param {Object} eventData - The event data to send
- * @param {string} eventData.event_type - Type of event (e.g., 'navigation', 'highlight', 'link_click', 'page_html')
+ * @param {string} eventData.event_type - Type of event (e.g., 'navigation', 'highlight', 'link_click', 'page_html', 'new_tab_html', 'navigation_html')
  * @param {string} eventData.url - Current page URL
  * @param {string} [eventData.text] - Text content (for copy/paste events)
  * @param {string} [eventData.highlighted_text] - Highlighted text

@@ -61,13 +61,14 @@ def create_tables():
     cursor = conn.cursor()
     
     try:
+        # Create table if it doesn't exist
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS browser_events_v2 (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 event_type VARCHAR(50) NOT NULL,
                 url TEXT NOT NULL,
                 page_title TEXT,
-                html_content TEXT,
+                html_content MEDIUMTEXT,
                 text TEXT,
                 highlighted_text TEXT,
                 clicked_url TEXT,
@@ -78,8 +79,27 @@ def create_tables():
             )
         """)
         logger.info("Database table created successfully")
+        
+        # Check if html_content column needs to be altered to MEDIUMTEXT
+        cursor.execute("""
+            SELECT COLUMN_TYPE 
+            FROM INFORMATION_SCHEMA.COLUMNS 
+            WHERE TABLE_SCHEMA = DATABASE() 
+            AND TABLE_NAME = 'browser_events_v2' 
+            AND COLUMN_NAME = 'html_content'
+        """)
+        
+        result = cursor.fetchone()
+        if result and result[0] in ['text', 'longtext', 'mediumblob']:
+            # Alter the column to MEDIUMTEXT
+            cursor.execute("""
+                ALTER TABLE browser_events_v2 
+                MODIFY COLUMN html_content MEDIUMTEXT
+            """)
+            logger.info("Updated html_content column to MEDIUMTEXT")
+        
     except Error as e:
-        logger.error(f"Error creating browser_events table: {e}")
+        logger.error(f"Error creating/updating browser_events table: {e}")
         raise
     finally:
         cursor.close()

@@ -59,6 +59,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       url: changeInfo.url,
       user_agent: navigator.userAgent
     });
+    
+    // Capture HTML after navigation with a delay
+    if (changeInfo.url && !changeInfo.url.startsWith('chrome://') && !changeInfo.url.startsWith('extension://')) {
+      setTimeout(() => {
+        captureTabHTML(tabId, changeInfo.url, 'navigation_html');
+      }, 3000); // 3 second delay to allow page to load
+    }
   }
 });
 
@@ -72,32 +79,65 @@ chrome.tabs.onCreated.addListener((tab) => {
     url: tab?.url || 'about:newtab',
     user_agent: navigator.userAgent
   });
+  
+  // If tab has a URL, capture HTML after a delay
+  if (tab?.url && tab.url !== 'about:newtab' && tab.url !== 'about:blank') {
+    setTimeout(() => {
+      captureTabHTML(tab.id, tab.url, 'new_tab_html');
+    }, 3000); // 3 second delay to allow page to load
+  }
 });
+
+// Function to capture HTML from a tab
+async function captureTabHTML(tabId, url, eventType = 'new_tab_html') {
+  try {
+    // Check if we can inject scripts into this tab
+    const tab = await chrome.tabs.get(tabId);
+    
+    // Skip if tab is not accessible (chrome://, extension://, etc.)
+    if (!tab.url || tab.url.startsWith('chrome://') || tab.url.startsWith('extension://')) {
+      console.log('Skipping HTML capture for restricted URL:', tab.url);
+      return;
+    }
+    
+    // Execute script to capture HTML
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: () => {
+        try {
+          const html = document.documentElement.outerHTML;
+          const title = document.title;
+          return {
+            html: html,
+            title: title,
+            length: html.length
+          };
+        } catch (error) {
+          console.error('Error capturing HTML:', error);
+          return null;
+        }
+      }
+    });
+    
+    if (results && results[0] && results[0].result) {
+      const htmlData = results[0].result;
+      console.log('Captured HTML for', eventType, ':', url, 'Length:', htmlData.length);
+      
+      // Send HTML to backend
+      sendEventToBackend({
+        event_type: eventType,
+        url: url,
+        page_title: htmlData.title,
+        html_content: htmlData.html,
+        user_agent: navigator.userAgent
+      });
+    }
+  } catch (error) {
+    console.error('Error capturing tab HTML:', error);
+  }
+}
 
 // Handle context menu items (if we want to add them later)
 chrome.runtime.onStartup.addListener(() => {
   console.log('Extension started up');
 });
-
-// Clean up old data periodically (optional)
-setInterval(async () => {
-  try {
-    const result = await chrome.storage.local.get();
-    const now = Date.now();
-    const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-    
-    for (const [url, notes] of Object.entries(result)) {
-      if (Array.isArray(notes)) {
-        const filteredNotes = notes.filter(note => 
-          now - note.timestamp < maxAge
-        );
-        
-        if (filteredNotes.length !== notes.length) {
-          await chrome.storage.local.set({ [url]: filteredNotes });
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error cleaning up old data:', error);
-  }
-}, 24 * 60 * 60 * 1000); // Run daily
